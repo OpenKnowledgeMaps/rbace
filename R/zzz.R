@@ -2,7 +2,6 @@ ct <- function(l) Filter(Negate(is.null), l)
 
 bs_GET <- function(query, opts){
   cli <- crul::HttpClient$new(url = bs_base(),
-    headers = list(`User-Agent` = rbace_ua(), `X-USER-AGENT` = rbace_ua()),
     opts = opts)
   temp <- cli$get(query = query)
   if (temp$status_code > 201) {
@@ -14,7 +13,6 @@ bs_GET <- function(query, opts){
 
 bs_RETRY <- function(query, opts, ret) {
   cli <- crul::HttpClient$new(url = bs_base(),
-    headers = list(`User-Agent` = rbace_ua(), `X-USER-AGENT` = rbace_ua()),
     opts = opts)
   temp <- cli$retry("GET", query = query,
     pause_base = ret$pause_base,
@@ -34,13 +32,6 @@ bs_RETRY <- function(query, opts, ret) {
 
 bs_base <- function() {
   "https://api.base-search.net/cgi-bin/BaseHttpSearchInterface.fcgi"
-}
-
-rbace_ua <- function() {
-  versions <- c(paste0("r-curl/", utils::packageVersion("curl")),
-    paste0("crul/", utils::packageVersion("crul")), sprintf("rOpenSci(rbace/%s)",
-      utils::packageVersion("rbace")))
-  paste0(versions, collapse = " ")
 }
 
 `%||%` <- function(x, y) if (is.null(x)) y else x
