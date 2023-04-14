@@ -42,6 +42,7 @@
 #' retry options to pass on to the HTTP request. default values are passed
 #' for you, but you can change them by setting an option in
 #' `bs_retry_options()`
+#' @param nonpublic (logical) Searches hidden content providers
 #' @param ... Facet field based query options (See Facet below) or curl
 #' options passed on to [crul::verb-GET]
 #' @param x input to `bs_meta`
@@ -61,7 +62,7 @@
 bs_search <- function(query = NULL, target = NULL, coll = NULL,
   boost_oa = FALSE, hits = NULL, offset = NULL, fields = NULL, sortby = NULL,
   facets = NULL, facet_limit = 100, facet_sort = NULL, filter = NULL,
-  raw = FALSE, parse = "df", retry = bs_retry_options(), ...) {
+  raw = FALSE, parse = "df", retry = bs_retry_options(), non_public = FALSE, ...) {
 
   enforce_rate_limit()
   on.exit(Sys.setenv(rbace_time = as.numeric(Sys.time())))
@@ -75,13 +76,17 @@ bs_search <- function(query = NULL, target = NULL, coll = NULL,
   assert(filter, c("character", "AsIs"))
   if (!is.null(fields)) fields <- paste(fields, collapse = ",")
   if (!is.null(facets)) facets <- paste(facets, collapse = ",")
-  query <- ct(list(func = 'PerformSearch', query = query,
+  param_list <- list(func = 'PerformSearch', query = query,
                 coll = coll, target = target,
                 boost = if (boost_oa) "oa" else NULL,
                 fields = fields, hits = hits, offset = offset,
                 sortby = sortby, facets = facets,
                 facet_limit = facet_limit, facet_sort = facet_sort,
-                filter = filter))
+                filter = filter)
+  if(non_public==TRUE) {
+    param_list$triple <- 1
+  }                
+  query <- ct(param_list)
 
   # add any field specific facet parameters
   facpars <- capture_facet_params(...)
