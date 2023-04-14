@@ -1,6 +1,7 @@
 ct <- function(l) Filter(Negate(is.null), l)
 
 bs_GET <- function(query, opts){
+  query <- bs_auth(query)
   cli <- crul::HttpClient$new(url = bs_base(),
     opts = opts)
   temp <- cli$get(query = query)
@@ -12,6 +13,7 @@ bs_GET <- function(query, opts){
 }
 
 bs_RETRY <- function(query, opts, ret) {
+  query <- bs_auth(query)
   cli <- crul::HttpClient$new(url = bs_base(),
     opts = opts)
   temp <- cli$retry("GET", query = query,
@@ -32,6 +34,11 @@ bs_RETRY <- function(query, opts, ret) {
 
 bs_base <- function() {
   "https://api.base-search.net/cgi-bin/BaseHttpSearchInterface.fcgi"
+}
+
+bs_auth <- function(query) {
+  query$apikey <- Sys.getenv("R_BASE_APIKEY")
+  return (query)
 }
 
 `%||%` <- function(x, y) if (is.null(x)) y else x
